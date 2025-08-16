@@ -235,4 +235,158 @@
       <button onclick="limparLog()">🗑️ Limpar Log</button>
     </div>
   </div>
+   <script>
+    let ipProjetor = "";
+    let senhaPJLink = "";
+    let modoDemo = false;
+    let conectado = false;
+
+    // Configuração do bridge Node.js
+    const ipBridge = "localhost";
+    const portaBridge = 3000;
+
+    // Service Worker para PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(registration => console.log('SW registered'))
+        .catch(error => console.log('SW registration failed'));
+    }
+
+    document.getElementById("conectar").addEventListener("click", () => {
+      ipProjetor = document.getElementById("ip").value.trim();
+      senhaPJLink = document.getElementById("senha").value.trim();
+      modoDemo = document.getElementById("demo").checked;
+
+      if (!ipProjetor) {
+        alert("Por favor, digite o IP do projetor!");
+        return;
+      }
+
+      conectado = true;
+      atualizarStatusIndicador();
+      
+      const timestamp = new Date().toLocaleTimeString();
+      logMsg(`[${timestamp}] ✅ Conectado ao projetor ${ipProjetor}`);
+      logMsg(`[${timestamp}] 🔧 Modo Demo: ${modoDemo ? 'ATIVADO' : 'DESATIVADO'}`);
+      
+      if (!modoDemo) {
+        testarConexao();
+      }
+    });
+
+    function testarConexao() {
+      logMsg(`[${new Date().toLocaleTimeString()}] 🔍 Testando conexão...`);
+      enviarComando('%1POWR ?'); // Consulta status de energia
+    }
+
+    function enviarComando(comando) {
+      if (!ipProjetor) {
+        alert("⚠️ Digite o IP do projetor primeiro!");
+        return;
+      }
+
+      const timestamp = new Date().toLocaleTimeString();
+
+      if (modoDemo) {
+        logMsg(`[${timestamp}] 🎭 [DEMO] Comando: ${comando}`);
+        
+        // Simular resposta baseada no comando
+        setTimeout(() => {
+          let resposta = "OK";
+          if (comando.includes('POWR ?')) resposta = "1"; // Ligado
+          else if (comando.includes('POWR 1')) resposta = "Ligando...";
+          else if (comando.includes('POWR 0')) resposta = "Desligando...";
+          
+          logMsg(`[${timestamp}] 📥 [DEMO] Resposta: ${resposta}`);
+        }, 500);
+        return;
+      }
+
+      logMsg(`[${timestamp}] 📤 Enviando: ${comando}`);
+
+      fetch(`http://${ipBridge}:${portaBridge}/comando`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ip: ipProjetor,
+          senha: senhaPJLink,
+          comando: comando
+        })
+      })
+        .then(res => res.text())
+        .then(txt => {
+          logMsg(`[${timestamp}] 📥 Resposta: ${txt}`);
+          if (txt.includes("erro") || txt.includes("falhou")) {
+            conectado = false;
+            atualizarStatusIndicador();
+          }
+        })
+        .catch(err => {
+          logMsg(`[${timestamp}] ❌ Erro: ${err.message}`);
+          conectado = false;
+          atualizarStatusIndicador();
+        });
+    }
+
+    function logMsg(msg) {
+      const logElement = document.getElementById("log");
+      logElement.textContent += msg + "\n";
+      logElement.scrollTop = logElement.scrollHeight;
+    }
+
+    function limparLog() {
+      document.getElementById("log").textContent = "Log limpo...\n";
+    }
+
+    function atualizarStatusIndicador() {
+      const indicator = document.getElementById("statusIndicator");
+      if (conectado) {
+        indicator.classList.add("connected");
+      } else {
+        indicator.classList.remove("connected");
+      }
+    }
+
+    // Carregar configurações salvas
+    window.addEventListener('load', () => {
+      const savedIP = localStorage.getItem('ibcv_ip');
+      const savedDemo = localStorage.getItem('ibcv_demo');
+      
+      if (savedIP) {
+        document.getElementById('ip').value = savedIP;
+      }
+      
+      if (savedDemo === 'true') {
+        document.getElementById('demo').checked = true;
+      }
+    });
+
+    // Salvar configurações
+    document.getElementById('ip').addEventListener('change', (e) => {
+      localStorage.setItem('ibcv_ip', e.target.value);
+    });
+
+    document.getElementById('demo').addEventListener('change', (e) => {
+      localStorage.setItem('ibcv_demo', e.target.checked);
+    });
+
+    // Atalhos de teclado
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey) {
+        switch(e.key) {
+          case '1':
+            e.preventDefault();
+            enviarComando('%1POWR 1');
+            break;
+          case '0':
+            e.preventDefault();
+            enviarComando('%1POWR 0');
+            break;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+
 
