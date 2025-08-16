@@ -1,6 +1,6 @@
 {
     "name": "IBCV Datashow",
-    "short_name": "Datashow",
+    "short_name": "IBCV Datashow",
     "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#ffffff",
