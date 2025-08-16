@@ -30,18 +30,18 @@
       width: 120px;
       height: 120px;
       margin: 0 auto 20px;
-      background: white;
       border-radius: 50%;
+      overflow: hidden; /* deixa a imagem redonda */
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
-    ."src": "LogoIBCV.jpg"
-      width: 80px;
-      height: 80px;
-      fill: #0073e6;
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
 
     h1 {
@@ -185,13 +185,9 @@
 </head>
 <body>
   <div class="container">
-    <!-- Logo IBCV usando SVG inline -->
+    <!-- Logo IBCV -->
     <div class="logo">
-      <svg viewBox="0 0 100 50">
-        <text x="50" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#0073e6">
-          IBCV
-        </text>
-      </svg>
+      <img src="LogoIBCV.jpg" alt="Logo IBCV">
     </div>
 
     <h1>IBCV-DATASHOW</h1>
@@ -279,94 +275,8 @@
       enviarComando('%1POWR ?'); // Consulta status de energia
     }
 
-    function enviarComando(comando) {
-      if (!ipProjetor) {
-        alert("⚠️ Digite o IP do projetor primeiro!");
-        return;
-      }
-
-      const timestamp = new Date().toLocaleTimeString();
-
-      if (modoDemo) {
-        logMsg(`[${timestamp}] 🎭 [DEMO] Comando: ${comando}`);
-        
-        // Simular resposta baseada no comando
-        setTimeout(() => {
-          let resposta = "OK";
-          if (comando.includes('POWR ?')) resposta = "1"; // Ligado
-          else if (comando.includes('POWR 1')) resposta = "Ligando...";
-          else if (comando.includes('POWR 0')) resposta = "Desligando...";
-          
-          logMsg(`[${timestamp}] 📥 [DEMO] Resposta: ${resposta}`);
-        }, 500);
-        return;
-      }
-
-      logMsg(`[${timestamp}] 📤 Enviando: ${comando}`);
-
-      fetch(`http://${ipBridge}:${portaBridge}/comando`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ip: ipProjetor,
-          senha: senhaPJLink,
-          comando: comando
-        })
-      })
-        .then(res => res.text())
-        .then(txt => {
-          logMsg(`[${timestamp}] 📥 Resposta: ${txt}`);
-          if (txt.includes("erro") || txt.includes("falhou")) {
-            conectado = false;
-            atualizarStatusIndicador();
-          }
-        })
-        .catch(err => {
-          logMsg(`[${timestamp}] ❌ Erro: ${err.message}`);
-          conectado = false;
-          atualizarStatusIndicador();
-        });
-    }
-
-    function logMsg(msg) {
-      const logElement = document.getElementById("log");
-      logElement.textContent += msg + "\n";
-      logElement.scrollTop = logElement.scrollHeight;
-    }
-
-    function limparLog() {
-      document.getElementById("log").textContent = "Log limpo...\n";
-    }
-
-    function atualizarStatusIndicador() {
-      const indicator = document.getElementById("statusIndicator");
-      if (conectado) {
-        indicator.classList.add("connected");
-      } else {
-        indicator.classList.remove("connected");
-      }
-    }
-
-    // Carregar configurações salvas
-    window.addEventListener('load', () => {
-      const savedIP = localStorage.getItem('ibcv_ip');
-      const savedDemo = localStorage.getItem('ibcv_demo');
-      
-      if (savedIP) {
-        document.getElementById('ip').value = savedIP;
-      }
-      
-      if (savedDemo === 'true') {
-        document.getElementById('demo').checked = true;
-      }
-    });
-
-    // Salvar configurações
-    document.getElementById('ip').addEventListener('change', (e) => {
-      localStorage.setItem('ibcv_ip', e.target.value);
-    });
-
-    document.getElementById('demo').addEventListener('change', (e) => {
+    function env
+'demo').addEventListener('change', (e) => {
       localStorage.setItem('ibcv_demo', e.target.checked);
     });
 
@@ -388,6 +298,7 @@
   </script>
 </body>
 </html>
+
 
 
 
