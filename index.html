@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IBCV - DATASHOW</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <img src="C:\Users\windows\Desktop\DATASHOW IBCV\480193498_17926823220001927_624583245629748222_n.jpg" alt="200">
+  <h1>IBCV-DATASHOW</h1>
+
+  <div class="config">
+    <label>IP do Projetor: <input id="ip" type="text" placeholder="192.168.0.150" /></label>
+    <label>Senha PJLink: <input id="senha" type="password" /></label>
+    <label>Modo Demo: <input id="demo" type="checkbox" /></label>
+    <button id="conectar">Conectar</button>
+  </div>
+
+  <div class="controles">
+    <button onclick="enviarComando('%1POWR 1')">Ligar</button>
+    <button onclick="enviarComando('%1POWR 0')">Desligar</button>
+    <button onclick="enviarComando('%1AVMT 31')">Mudo Vídeo</button>
+    <button onclick="enviarComando('%1AVMT 11')">Mudo Áudio</button>
+    <button onclick="enviarComando('%1INPT 31')">HDMI 1</button>
+    <button onclick="enviarComando('%1INPT 32')">HDMI 2</button>
+  </div>
+
+  <pre id="log"></pre>
+
+  <script src="datashow.js">
+  </script>
+</body>
+</html>
